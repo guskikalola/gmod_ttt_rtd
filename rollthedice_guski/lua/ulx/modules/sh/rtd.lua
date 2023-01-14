@@ -7,10 +7,7 @@ function ulx.rtd(calling_ply)
 	if not can_use then
 		ULib.tsayError( calling_ply, "[RTD] " .. message, true )
 	else
-		local event = RTDCore:runRTD(calling_ply)
-		ULib.tsay(calling_ply, "[RTD] " .. event["description"], true)
-		ULib.csay(calling_ply, "[RTD] " .. event["description"])
-		event:run(calling_ply)
+		RTDCore:runRTD(calling_ply)
 	end
 	
 end
@@ -30,6 +27,9 @@ function ulx.rtd_force(calling_ply, target_plys)
 		local v = target_plys[i]
 		local result = RTDCore:can_use_rtd(v) 
 		local can_use = result["can_use"]
+		if v == calling_ply then
+			can_use = false
+		end
 		if can_use then
 			table.insert( affected_plys, v )
 			ulx.rtd(v)
