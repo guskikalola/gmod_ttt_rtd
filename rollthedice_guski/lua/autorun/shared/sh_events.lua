@@ -35,7 +35,7 @@ local ragdoll = RTDEvent:create("Ragdoll", "Ragdoll por 20s", ULTRARARE, functio
     ulx.ragdoll(player, {player}, false)
     timer.Simple( 20, function()
         if RTDCore:sameRound(round_identifier) then
-            self:disable(player)
+            ulx.ragdoll(player, {player}, true)
         end
     end)
 end)
@@ -160,6 +160,9 @@ RTDEvent:setDisableFunction(function(self, player)
 end)
 
 events["death"] = death
+
+-- events["position_swap"]
+
 
 -- events["spawn_weapon"] -- Arma de T o de D ?
 -- events["credits_add"] -- Hacer check del rol

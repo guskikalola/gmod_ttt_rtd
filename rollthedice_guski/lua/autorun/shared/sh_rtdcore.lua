@@ -66,11 +66,11 @@ end
 function RTDCore:end_round()
     current_round_identifier = nil
     round_active = false
-    RTDCore:run_disable()
+    -- RTDCore:run_disable()
 end
 
 function RTDCore:sameRound(round_identifier)
-    return round_identifier == current_round_identifier
+    return true -- round_identifier == current_round_identifier
 end
 
 function RTDCore:random_event()
