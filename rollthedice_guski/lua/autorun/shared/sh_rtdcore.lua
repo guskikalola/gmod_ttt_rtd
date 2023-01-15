@@ -8,7 +8,7 @@ rtd_used_logs = {}
 -- This variable is changed using TTT hooks
 round_active = false
 -- Current round identifier, set using hooks and calculated with current date
-current_round_identifier = nil
+local current_round_identifier = nil
 
 local function inTable(player)
     for key, value in pairs(rtd_used_logs) do
@@ -59,18 +59,18 @@ end
 
 function RTDCore:begin_round()
     RTDCore:clear_logs()
-    current_round_identifier = CurTime()
     round_active = true
+    current_round_identifier = math.floor( CurTime() )
 end
 
 function RTDCore:end_round()
-    current_round_identifier = nil
     round_active = false
-    -- RTDCore:run_disable()
+    current_round_identifier = nil
+    RTDCore:run_disable()
 end
 
 function RTDCore:sameRound(round_identifier)
-    return true -- round_identifier == current_round_identifier
+    return round_identifier == current_round_identifier
 end
 
 function RTDCore:random_event()
@@ -88,22 +88,24 @@ function RTDCore:random_event()
 end
 
 function RTDCore:globalNotify(player, message)
-    ULib.tsayColor(player, true, Color(200,0,205,255),  "[RTD] " , Color(204,100,255,255), event["name"] .. ": " , Color(204,255,255,255), message )
-    ULib.csay(player, "[RTD] " .. event["name"] .. ": " .. message, Color(200,0,205,255), 10, 0.5)
+    ULib.tsayColor(nil, true, Color(200,0,205,255),  "[RTD] " , Color(204,100,255,255), event["name"] .. ": " , Color(204,255,255,255), message )
+    ULib.csay(nil, "[RTD] " .. event["name"] .. ": " .. message, Color(200,0,205,255), 10, 0.5)
 end
 
 function RTDCore:notificate(player, event)
     ULib.tsayColor(player, true, Color(200,0,205,255),  "[RTD] " , Color(204,100,255,255), event["name"] .. ": " , Color(204,255,255,255), event["description"] )
+    --DEBUGGING ULib.tsayColor(nil, true, Color(200,0,205,255),  player:GetName() .. " [RTD] " , Color(204,100,255,255), event["name"] .. ": " , Color(204,255,255,255), event["description"] )
     ULib.csay(player, "[RTD] " .. event["name"] .. ": " .. event["description"], Color(200,0,205,255), 10, 0.5)
 end
 
 function RTDCore:notifyEnd(player, event_name)
     ULib.tsayColor(player, true, Color(200,0,205,255), "[RTD] ", Color(204,255,255,255), "Se ha acabado el efecto: " .. event_name )
+    --DEBUGGING ULib.tsayColor(nil, true, Color(200,0,205,255), player:GetName() .. " [RTD] ", Color(204,255,255,255), "Se ha acabado el efecto: " .. event_name )
 end
 
 function RTDCore:runRTD(player)
     event = RTDCore:random_event()
     RTDCore:store_log(player,event)
     RTDCore:notificate(player,event)
-    event:run(event, player, current_round_identifier)
+    event:run(player, current_round_identifier)
 end

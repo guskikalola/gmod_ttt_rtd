@@ -26,12 +26,11 @@ end)
 
 invisibility:setDisableFunction(function(self, player)
     ULib.invisible(player, false)
-    RTDCore:notifyEnd(player, self.name)
 end)
 
 events["invisibility"] = invisibility
 
-local ragdoll = RTDEvent:create("Ragdoll", "Ragdoll por 20s", ULTRARARE, function(self, player, round_identifier)
+local ragdoll = RTDEvent:create("Ragdoll", "Ragdoll por 20s", RARE, function(self, player, round_identifier)
     ulx.ragdoll(player, {player}, false)
     timer.Simple( 20, function()
         if RTDCore:sameRound(round_identifier) then
@@ -42,11 +41,9 @@ end)
 
 ragdoll:setDisableFunction(function(self, player)
     ulx.ragdoll(player, {player}, true)
-    RTDCore:notifyEnd(player, self.name)
 end)
 
 events["ragdoll"] = ragdoll
-
 
 events["slap"] = RTDEvent:create("Slap", "Slap!", UNCOMMON, function(self, player, round_identifier)
     ULib.slap(player, 10)
@@ -64,8 +61,6 @@ events["low_gravity"] = RTDEvent:create("Gravedad Baja", "Tienes menor gravedad 
         RTDCore:notifyEnd(player, self.name)
     end)
 end)
-
-
 
 events["high_gravity"] = RTDEvent:create("Gravedad Alta", "Tienes mayor gravedad por 25s", RARE, function(self, player, round_identifier)
     local original_grav = player:GetGravity()
@@ -147,7 +142,7 @@ events["gimp"] = RTDEvent:create("Gimp", "Intenta hablar. Gimp por 15s", RARE, f
     end)
 end)
 
-death = RTDEvent:create("Muerte", "Vas a morir en los proximos 20s", ULTRARARE, function(self, player, round_identifier)
+events["death"] = RTDEvent:create("Muerte", "Vas a morir en los proximos 20s", DEBUG, function(self, player, round_identifier)
     timer.Simple( 20, function()
         if RTDCore:sameRound(round_identifier) then
             ulx.maul(player,{player})
@@ -155,13 +150,22 @@ death = RTDEvent:create("Muerte", "Vas a morir en los proximos 20s", ULTRARARE, 
     end)
 end)
 
-RTDEvent:setDisableFunction(function(self, player)
-    RTDCore:notifyEnd(player, self.name)
+events["position_swap"] = RTDEvent:create("Cambio de Posición", "Has cambiado de posición con otro jugador", UNCOMMON, function(self, player, round_identifier)
+    local players = ULib.getAllReadyPlayers()
+    local target = players[1]
+    for i, ply in RandomPairs(players) do
+        if ply ~= player then
+            target = ply
+            break
+        end
+    end
+
+    local targetPos = target:GetPos()
+    local playerPos = player:GetPos()
+
+    target:SetPos(playerPos)
+    player:SetPos(targetPos)
 end)
-
-events["death"] = death
-
--- events["position_swap"]
 
 
 -- events["spawn_weapon"] -- Arma de T o de D ?

@@ -23,5 +23,5 @@ function RTDEvent:disable(player)
 end
 
 function RTDEvent:run(player, round_identifier)
-    self.func(player, round_identifier)
+    self.func(self, player, round_identifier)
 end
