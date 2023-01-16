@@ -21,10 +21,16 @@ function RTDCore:can_use_rtd(player)
     local can_use = true 
     local message = ""
 
+    local isGhost = false
+
+    if player.IsGhost ~= nill then
+        isGhost = player:IsGhost() 
+    end
+
     if not round_active then
         can_use = false
         message = "La ronda no esta activa, no puedes usarlo ahora."        
-    elseif not player:Alive() or player:IsFrozen() then
+    elseif not player:Alive() or player:IsFrozen() or isGhost then
         can_use = false
         message = "Solo puedes usar esto estando vivo durante la ronda."
     elseif inTable(player) then
@@ -73,14 +79,64 @@ function RTDCore:sameRound(round_identifier)
     return round_identifier == current_round_identifier
 end
 
-function RTDCore:random_event()
+function RTDCore:random_event(player)
     local cumulativeProbability = 0
+
+    local multiplierTraitor = 0
+    local multiplierDetective = 0
+    local multiplierAll = 1
+
+    if player.GetRole == nil then -- Not in TTT gamemode 
+        multiplierTraitor = 0
+        multiplierDetective = 0
+        multiplierAll = 1
+    elseif player:GetRole() == ROLE_TRAITOR then -- More traitor events, less inocent ones
+        multiplierTraitor = 1
+        multiplierDetective = 0
+        multiplierAll = 0.1
+    elseif player:GetRole() == ROLE_DETECTIVE then -- More detective events, less inocent ones
+        multiplierTraitor = 0
+        multiplierDetective = 1
+        multiplierAll = 0.1
+    else -- player is innocent
+        multiplierTraitor = 0
+        multiplierDetective = 0
+        multiplierAll = 1
+    end
+
+    print(multiplierTraitor)
+    print(multiplierDetective)
+    print(multiplierAll)
+
     for k, v in pairs(events) do
-        cumulativeProbability = cumulativeProbability + v["probability"]
+        local probability = v["probability"]
+        if v["role"] == TRAITOR_EVENT then
+            probability = probability * multiplierTraitor
+        elseif v["role"] == DETECTIVE_EVENT then
+            probability = probability * multiplierDetective
+        elseif v["role"] == TRAITORDETECTIVE_EVENT then
+            probability = probability * (multiplierDetective+multiplierTraitor)
+        else -- v["role"] == ALL_EVENT
+            probability = probability * multiplierAll
+        end
+        
+        cumulativeProbability = cumulativeProbability + probability
     end
     local remainingDistance = math.random() * cumulativeProbability
     for k, v in RandomPairs(events) do
-        remainingDistance = remainingDistance - v["probability"]
+
+        local probability = v["probability"]
+        if v["role"] == TRAITOR_EVENT then
+            probability = probability * multiplierTraitor
+        elseif v["role"] == DETECTIVE_EVENT then
+            probability = probability * multiplierDetective
+        elseif v["role"] == TRAITORDETECTIVE_EVENT then
+            probability = probability * (multiplierDetective+multiplierTraitor)
+        else -- v["role"] == ALL_EVENT
+            probability = probability * multiplierAll
+        end
+        
+        remainingDistance = remainingDistance - probability
         if remainingDistance < 0 then
             return v
         end
@@ -104,7 +160,7 @@ function RTDCore:notifyEnd(player, event_name)
 end
 
 function RTDCore:runRTD(player)
-    event = RTDCore:random_event()
+    event = RTDCore:random_event(player)
     RTDCore:store_log(player,event)
     RTDCore:notificate(player,event)
     event:run(player, current_round_identifier)

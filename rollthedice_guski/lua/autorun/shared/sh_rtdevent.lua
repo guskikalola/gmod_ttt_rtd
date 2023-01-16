@@ -1,11 +1,17 @@
 RTDEvent = {}
 RTDEvent.__index = RTDEvent
 
-function RTDEvent:create(name, description, probability, func)
+DETECTIVE_EVENT = "detective"
+TRAITOR_EVENT = "traitor"
+TRAITORDETECTIVE_EVENT = "traitordetective"
+ALL_EVENT = "all"
+
+function RTDEvent:create(name, description, role, probability, func)
    local event = {}             
    setmetatable(event,RTDEvent) 
    event.name = name
    event.description = description
+   event.role = role
    event.probability = probability
    event.func = func
    event.disableFunc = nil
